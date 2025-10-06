@@ -1,26 +1,26 @@
 package handlers
 
 import (
-  "encoding/json"
   "net/http"
 
-  "github.com/gorilla/mux"
+  "github.com/gin-gonic/gin"
   "github.com/Richard-Persson/SAP-Server-API/db"
   "github.com/Richard-Persson/SAP-Server-API/models"
 )
 
 func Router() http.Handler {
-  r := mux.NewRouter()
-  r.HandleFunc("/users", listUsers).Methods("GET")
-  return r
+	router := gin.Default()
+	router.GET("/users",listUsers)
+  return router
 }
 
-func listUsers(w http.ResponseWriter, r *http.Request) {
+
+
+func listUsers(context *gin.Context) {
   var users []models.User
   if err := db.DB.Select(&users, "SELECT id, full_name FROM users ORDER BY id DESC"); err != nil {
-    http.Error(w, err.Error(), http.StatusInternalServerError)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
     return
   }
-  json.NewEncoder(w).Encode(users)
+	context.JSON(http.StatusOK, users)
 }
-
