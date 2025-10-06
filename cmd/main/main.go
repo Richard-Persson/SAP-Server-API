@@ -24,8 +24,6 @@ func main() {
 	}
 
 
-
-
 	//Lager tabeller
 	if err := db.MigrateFromFiles(ctx, "migrations"); err != nil {
 		log.Fatalf("migrate failed: %v", err)
@@ -33,14 +31,14 @@ func main() {
 
 
 
-  srv := &http.Server{
+  server := &http.Server{
     Addr:    ":8080",
     Handler: handlers.Router(),
   }
 
   go func() {
     log.Println("starting server on :8080")
-    if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+    if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
       log.Fatalf("server error: %v", err)
     }
   }()
@@ -51,7 +49,7 @@ func main() {
 
   ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
   defer cancel()
-  if err := srv.Shutdown(ctx); err != nil {
+  if err := server.Shutdown(ctx); err != nil {
     log.Fatalf("shutdown error: %v", err)
   }
   if err := db.DB.Close(); err != nil {
