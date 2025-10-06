@@ -1,0 +1,49 @@
+# Binaries for programs and plugins
+/bin/
+/build/
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output of the Go coverage tool
+coverage.out
+*.coverprofile
+
+# Test results
+*.test
+
+# Dependency directories (optional: commit vendor/ if you use it)
+vendor/
+
+# Go workspace and cache (do not ignore go.mod or go.sum)
+GOMODCACHE/
+_go_build_info
+*.modcache
+
+.vscode/
+*.swp
+*.swo
+
+
+# Environment and secrets
+.env
+.env.*
+
+# Logs and temporary files
+*.log
+logs/
+tmp/
+temp/
+
+# Docker compose overrides and local Dockerfiles
+docker-compose.override.yml
+docker-compose.*.yml
+**/Dockerfile.*.local
+
+# Build artifacts and CI
+.coverage
+.github/workflows/*.local
+
