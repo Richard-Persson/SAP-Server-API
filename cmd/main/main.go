@@ -1,7 +1,7 @@
 
 package main
 
-import (
+import (main
   "context"
   "log"
   "net/http"

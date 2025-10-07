@@ -7,7 +7,7 @@ import (
 	"github.com/gin-contrib/cors"
   "github.com/gin-gonic/gin"
   "github.com/Richard-Persson/SAP-Server-API/db"
-  "github.com/Richard-Persson/SAP-Server-API/models"
+  "github.com/Richard-Persson/SAP-Server-API/internal/dto"
 )
 
 func Router() http.Handler {
@@ -31,7 +31,7 @@ func Router() http.Handler {
 
 
 func listUsers(context *gin.Context) {
-  var users []models.User
+  var users []dto.User
   if err := db.DB.Select(&users, "SELECT id, full_name FROM users ORDER BY id DESC"); err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
     return
