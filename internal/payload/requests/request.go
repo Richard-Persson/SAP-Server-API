@@ -7,7 +7,7 @@ type RegisterRequest struct {
   Email  string `db:"email" json:"email"`
   FirstName  string `db:"first_name" json:"first_name"`
   LastName  string `db:"last_name" json:"last_name"`
-  Mobile  int `db:"mobile" json:"mobile"`
+  Mobile  string `db:"mobile" json:"mobile"`
   Password  string `db:"password" json:"password"`
 }
 
