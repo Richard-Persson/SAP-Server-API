@@ -1,19 +1,27 @@
 
+
+
+-- Billing Codes
+CREATE TABLE IF NOT EXISTS billing_codes (
+  id   BIGSERIAL PRIMARY KEY,
+  number INT NOT NULL
+);
+
 -- Users
 CREATE TABLE IF NOT EXISTS users (
-  id            BIGSERIAL PRIMARY KEY,
-  email          TEXT NOT NULL UNIQUE,
-  first_name     TEXT NOT NULL,
-  last_name      TEXT NOT NULL,
-  mobile         INT NOT NULL,
-  password       TEXT NOT NULL
+  id               BIGSERIAL PRIMARY KEY,
+  email            TEXT NOT NULL UNIQUE,
+  first_name       TEXT NOT NULL,
+  last_name        TEXT NOT NULL,
+  mobile           TEXT NOT NULL,
+  password         TEXT NOT NULL,
+  billing_code_id  BIGINT REFERENCES billing_codes(id)
 );
 
 -- Activities
 CREATE TABLE IF NOT EXISTS activities (
   id   BIGSERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  code TEXT NOT NULL
+  name TEXT NOT NULL
 );
 
 -- Months
@@ -36,19 +44,13 @@ CREATE TABLE IF NOT EXISTS days (
   UNIQUE(date, user_id)
 );
 
--- TimeEntries
+-- Time Entries
 CREATE TABLE IF NOT EXISTS time_entries (
-  id               BIGSERIAL PRIMARY KEY,
-  user_id          BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  day_id           BIGINT NOT NULL REFERENCES days(id) ON DELETE CASCADE,
-  date             DATE NOT NULL,
-  activity_id      BIGINT NOT NULL REFERENCES activities(id) ON DELETE SET NULL,
-  start_ts         TIMESTAMPTZ,
-  end_ts           TIMESTAMPTZ,
-  duration_minutes INT,
-  project_code     TEXT,
-  entry_status     INT,
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-  modified_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+  id           BIGSERIAL PRIMARY KEY,
+  user_id      BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  day_id       BIGINT NOT NULL REFERENCES days(id) ON DELETE CASCADE,
+  date         DATE NOT NULL,
+  activity_id  BIGINT REFERENCES activities(id) ON DELETE SET NULL
 );
+
 
