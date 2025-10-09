@@ -10,7 +10,7 @@ import (
 
 func listUsers(context *gin.Context) {
   var users []models.User
-  if err := db.DB.Select(&users, "SELECT id, first_name, last_name FROM users ORDER BY id DESC"); err != nil {
+  if err := db.DB.Select(&users, "SELECT id, email, first_name, last_name , mobile FROM users ORDER BY id DESC"); err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
     return
   }

@@ -17,7 +17,6 @@ func listMonths(context *gin.Context){
 	const query = 
 		`
 		SELECT id, year, month, user_id, total_hours FROM months 
-
 		`
 
 	err := db.DB.Select(&months, query)
@@ -26,7 +25,5 @@ func listMonths(context *gin.Context){
 	context.JSON(http.StatusInternalServerError, gin.H{"Error" : err.Error()})
 		return
 	}
-
-
 	context.JSON(http.StatusOK, months)
 }
