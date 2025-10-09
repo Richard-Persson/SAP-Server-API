@@ -1,6 +1,5 @@
-
-
 package requests
+
 
 
 type RegisterRequest struct {
@@ -15,3 +14,12 @@ type LoginRequest struct {
   Email    string `json:"email" binding:"required,email"`
   Password string `json:"password" binding:"required"`
 }
+
+type TimeEntryRequest struct {
+	UserID         	 int64      `db:"user_id" json:"user_id"`
+	ActivityID      *int64     `db:"activity_id" json:"activity_id,omitempty"`
+	Date 						 string `db:"date" json:"date"`
+	StartTime 			string `db:"start_time" json:"start_time"`
+	EndTime          string `db:"end_time" json:"end_time"`
+}
+

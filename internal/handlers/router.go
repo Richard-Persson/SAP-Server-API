@@ -16,7 +16,7 @@ func Router() http.Handler {
 	  // CORS config for React dev server
   router.Use(cors.New(cors.Config{
     AllowOrigins:     []string{"http://localhost:5173"},
-    AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+    AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"},
     AllowHeaders:     []string{"Content-Type"},
     AllowCredentials: true,
     MaxAge:           12 * time.Hour,
@@ -25,12 +25,13 @@ func Router() http.Handler {
 
 	router.GET("/users", listUsers)
 	router.GET("/users/:id", getUser)
+	router.GET("/users/entries/:id", getAllTimeEntries)
+
+	router.POST("/timeEntry", saveTimeEntry)
 
 
-	router.GET("/months",listMonths)
 
 	router.POST("/login", login)
-
 	router.POST("/register", register)
 
 

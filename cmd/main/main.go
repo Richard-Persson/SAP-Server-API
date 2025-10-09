@@ -19,12 +19,9 @@ func main() {
 	ctx := context.Background()
 
 	// Dropper tabeller 
-	/*
 	if err := db.RollbackFromFiles(ctx, "migrations"); err != nil {
 		log.Fatalf("Rollback failed: %v", err)
 	}
-	*/
-
 
 	//Lager tabeller
 	if err := db.MigrateFromFiles(ctx, "migrations"); err != nil {
