@@ -16,6 +16,7 @@ type User struct {
     Mobile        string       `db:"mobile" json:"mobile"`
     Password      string       `db:"password" json:"password"`
 		BillingCodeId int          `db:"billing_code_id" json:"billing_code_id"` 
+		Entries 			*[]TimeEntry  `json:"entries"` 
 
 }
 
