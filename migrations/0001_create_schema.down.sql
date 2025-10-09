@@ -1,6 +1,5 @@
 DROP TABLE IF EXISTS time_entries;
-DROP TABLE IF EXISTS days;
-DROP TABLE IF EXISTS months;
+DROP TABLE IF EXISTS user_month_hours;
 DROP TABLE IF EXISTS activities;
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS billing_codes;
 
