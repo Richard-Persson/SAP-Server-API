@@ -1,5 +1,23 @@
 
-ROLLBACK;
+
+
+-- Billing Codes
+CREATE TABLE IF NOT EXISTS billing_codes (
+  id   BIGSERIAL PRIMARY KEY,
+  salary DECIMAL NOT NULL
+);
+
+-- Users
+CREATE TABLE IF NOT EXISTS users (
+  id               BIGSERIAL PRIMARY KEY,
+  email            TEXT NOT NULL UNIQUE,
+  first_name       TEXT NOT NULL,
+  last_name        TEXT NOT NULL,
+  mobile           TEXT NOT NULL,
+  password         TEXT NOT NULL,
+  billing_code_id  BIGINT REFERENCES billing_codes(id) ON DELETE CASCADE
+);
+
 -- Activities
 CREATE TABLE IF NOT EXISTS activities (
   id   BIGSERIAL PRIMARY KEY,

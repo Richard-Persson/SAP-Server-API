@@ -31,7 +31,7 @@ func getUser(context *gin.Context){
 
 	const query = 
 		`
-		SELECT id, email, first_name, last_name, mobile 
+		SELECT id, email, first_name, last_name, mobile, billing_code_id
 		FROM users 
 		WHERE id = $1
 		`

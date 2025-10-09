@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
@@ -82,6 +83,15 @@ func getAllTimeEntries(context *gin.Context) {
 	var timeEntries []models.TimeEntry 
 
 	dbErr := db.DB.Select(&timeEntries,query,id)
+
+	//Removes T00:00:00Z From Date attribute
+	for i,obj := range timeEntries{
+		before, _, _ := strings.Cut(obj.Date,"T")
+		timeEntries[i].Date =  before
+		fmt.Println(obj.Date)
+	}
+
+
 
 	if dbErr != nil {
 		context.JSON(http.StatusInternalServerError, dbErr.Error())

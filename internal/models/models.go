@@ -2,9 +2,10 @@ package models
 
 
 
+
 type BillingCode struct {
     ID     int64 `db:"id" json:"id"`
-    Number int   `db:"number" json:"number"`
+    Salary int   `db:"salary" json:"salary"`
 }
 
 type User struct {
@@ -14,8 +15,7 @@ type User struct {
     LastName      string       `db:"last_name" json:"last_name"`
     Mobile        string       `db:"mobile" json:"mobile"`
     Password      string       `db:"password" json:"password"`
-    BillingCodeID *int64       `db:"billing_code_id" json:"billing_code_id,omitempty"`
-    BillingCode   *BillingCode `db:"-" json:"billing_code,omitempty"`
+		BillingCodeId int          `db:"billing_code_id" json:"billing_code_id"` 
 
 }
 
@@ -28,7 +28,7 @@ type TimeEntry struct {
 	ID   						int64  `db:"id" json:"id"`
 	UserID         	 int64      `db:"user_id" json:"user_id"`
 	ActivityID      *int64     `db:"activity_id" json:"activity_id,omitempty"`
-	Date 						 string `db:"date" json:"date"`
+  Date       			string `json:"date" format:"2006-01-02"`
 	StartTime 			string `db:"start_time" json:"start_time"`
 	EndTime          string `db:"end_time" json:"end_time"`
 	TotalHours	 float32   `db:"total_hours" json:"total_hours"`
