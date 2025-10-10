@@ -22,7 +22,7 @@ func login(context *gin.Context) {
 
   var user models.User
 
-  userError := db.DB.Get(&user, "SELECT id, first_name, last_name, email, mobile, password FROM users WHERE email=$1", loginRequest.Email)
+  userError := db.DB.Get(&user, "SELECT id, first_name, last_name, email, mobile, password, billing_code_id FROM users WHERE email=$1", loginRequest.Email)
   if userError != nil {
     context.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
     return
