@@ -27,6 +27,10 @@ func Router() http.Handler {
 	router.GET("/users/:id", getUser)
 	router.GET("/users/entries/:id", getAllTimeEntries)
 
+	router.GET("/billingcodes/:id",getBillingCodeById)
+	router.GET("/billingcodes", getAllBillingCodes)
+
+
 	router.POST("/timeEntry", saveTimeEntry)
 
 
