@@ -38,5 +38,5 @@ func login(context *gin.Context) {
 
 	//TODO Add Cookie and/or BasicAuthDb() for better authentication and user experience
 
-	context.JSON(http.StatusOK, gin.H{"id": user.ID})
+	context.JSON(http.StatusOK, user)
 }
