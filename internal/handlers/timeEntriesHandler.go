@@ -1,15 +1,14 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
 	"github.com/Richard-Persson/SAP-Server-API/internal/payload/requests"
+	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
 
@@ -85,11 +84,7 @@ func getAllTimeEntries(context *gin.Context) {
 	dbErr := db.DB.Select(&timeEntries,query,id)
 
 	//Removes T00:00:00Z From Date attribute
-	for i,obj := range timeEntries{
-		before, _, _ := strings.Cut(obj.Date,"T")
-		timeEntries[i].Date =  before
-		fmt.Println(obj.Date)
-	}
+	tools.RemoveTZ(&timeEntries)
 
 
 

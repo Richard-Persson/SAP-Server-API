@@ -1,18 +1,18 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
+	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
 
 func listUsers(context *gin.Context) {
   var users []models.User
+
   if err := db.DB.Select(&users, "SELECT id, email, first_name, last_name , mobile, billing_code_id FROM users ORDER BY id DESC"); err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
     return
@@ -20,7 +20,7 @@ func listUsers(context *gin.Context) {
 	context.JSON(http.StatusOK, users)
 }
 
-func getUser(context *gin.Context){
+func getUserById(context *gin.Context){
 
 	var user models.User
 	idString := context.Param("id")
@@ -54,13 +54,8 @@ func getUser(context *gin.Context){
 	err := db.DB.Get(&user, query,idNumber)
 	user.Entries = &timeEntries
 
-	// TODO Make this a function in tools and use it as a method
 	//Removes T00:00:00Z From Date attribute
-	for i,obj := range timeEntries{
-		before, _, _ := strings.Cut(obj.Date,"T")
-		timeEntries[i].Date =  before
-		fmt.Println(obj.Date)
-	}
+	tools.RemoveTZ(&timeEntries)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
