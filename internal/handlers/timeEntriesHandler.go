@@ -45,7 +45,7 @@ func saveTimeEntry (context *gin.Context){
 		context.JSON(http.StatusInternalServerError, timeParseErr1.Error())
 		return
 	}
-	if dateParseErr != nil {
+	if timeParseErr2 != nil {
 		context.JSON(http.StatusInternalServerError, timeParseErr2.Error())
 		return
 	}
@@ -94,3 +94,48 @@ func getAllTimeEntries(context *gin.Context) {
 	}
 	context.JSON(http.StatusAccepted, timeEntries)
 }
+
+
+
+func updateTimeEntry(context *gin.Context){
+
+
+	var request requests.UpdateTimeEntryRequest
+  if err := context.ShouldBindJSON(&request); err != nil {
+    context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+    return
+	}
+
+	const query = 
+	`
+		UPDATE time_entries
+		SET activity_id = $1, date = $2, start_time = $3, end_time = $4, total_hours = $5
+		WHERE id = $6
+	`
+	//TODO Make this a own function in tools package
+	date, _ := time.Parse("2006-01-02",request.Date)
+	startTime, _ := time.Parse("15:04",request.StartTime)
+	endTime,_  := time.Parse("15:04",request.EndTime)
+
+	total_hours := endTime.Sub(startTime).Hours()
+	var timeEntry models.TimeEntry
+
+	//Update timeEntry
+	_,err := db.DB.Exec(query,request.ActivityID, date, startTime, endTime,total_hours,request.ID)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "could not update timeEntry",
+			"errorMessage": err.Error(),
+		})
+		return
+	}
+
+	//Get the updated entry
+	 db.DB.Get(&timeEntry,"SELECT * FROM time_entries WHERE id = $1",request.ID)
+	tools.RemoveSingleTZ(&timeEntry)
+	context.JSON(http.StatusOK, timeEntry)
+
+}
+
+

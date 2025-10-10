@@ -34,6 +34,7 @@ func Router() http.Handler {
 	router.GET("/activities/:id", getActivityById)
 
 	router.POST("/timeEntry", saveTimeEntry)
+	router.PATCH("/timeEntry", updateTimeEntry)
 
 
 

@@ -23,3 +23,10 @@ type TimeEntryRequest struct {
 	EndTime          string `db:"end_time" json:"end_time"`
 }
 
+type UpdateTimeEntryRequest struct {
+	ID   						int64  `db:"id" json:"id"`
+	ActivityID      *int64     `db:"activity_id" json:"activity_id,omitempty"`
+	Date 						 string `db:"date" json:"date"`
+	StartTime 			string `db:"start_time" json:"start_time"`
+	EndTime          string `db:"end_time" json:"end_time"`
+}
