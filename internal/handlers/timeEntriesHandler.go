@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
@@ -16,6 +15,7 @@ import (
 func saveTimeEntry (context *gin.Context){
 
 	var request requests.TimeEntryRequest
+	var time_entry models.TimeEntry
 
 	if err := context.ShouldBindJSON(&request); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -28,29 +28,13 @@ func saveTimeEntry (context *gin.Context){
 		RETURNING id, user_id, activity_id, date, start_time, end_time, total_hours
 		`
 
+	date,startTime,endTime,total_hours,parseErr := tools.DateTimeHoursFormatter(request.Date,request.StartTime,request.EndTime)
 
-	var time_entry models.TimeEntry
-
-	// TODO The date format dd-mm-yyyy throws a panic in the program fix this
-	date, dateParseErr := time.Parse("2006-01-02",request.Date)
-	startTime, timeParseErr1 := time.Parse("15:04",request.StartTime)
-	endTime, timeParseErr2 := time.Parse("15:04",request.EndTime)
-
-	if dateParseErr != nil {
-		context.JSON(http.StatusInternalServerError, dateParseErr.Error())
+	if parseErr != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"parse error": parseErr.Error()})
 		return
 	}
 
-	if timeParseErr1 != nil {
-		context.JSON(http.StatusInternalServerError, timeParseErr1.Error())
-		return
-	}
-	if timeParseErr2 != nil {
-		context.JSON(http.StatusInternalServerError, timeParseErr2.Error())
-		return
-	}
-
-	total_hours := endTime.Sub(startTime).Hours()
 
 	err :=	db.DB.Get(&time_entry,query,request.UserID,request.ActivityID,date,startTime, endTime, total_hours)
 
@@ -101,23 +85,23 @@ func updateTimeEntry(context *gin.Context){
 
 
 	var request requests.UpdateTimeEntryRequest
-  if err := context.ShouldBindJSON(&request); err != nil {
-    context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-    return
+	if err := context.ShouldBindJSON(&request); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	const query = 
-	`
+		`
 		UPDATE time_entries
 		SET activity_id = $1, date = $2, start_time = $3, end_time = $4, total_hours = $5
 		WHERE id = $6
-	`
-	//TODO Make this a own function in tools package
-	date, _ := time.Parse("2006-01-02",request.Date)
-	startTime, _ := time.Parse("15:04",request.StartTime)
-	endTime,_  := time.Parse("15:04",request.EndTime)
+		`
 
-	total_hours := endTime.Sub(startTime).Hours()
+	date,startTime,endTime,total_hours,parseErr := tools.DateTimeHoursFormatter(request.Date,request.StartTime,request.EndTime)
+	if parseErr != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"parse error": parseErr.Error()})
+		return
+	}
 	var timeEntry models.TimeEntry
 
 	//Update timeEntry
@@ -132,7 +116,7 @@ func updateTimeEntry(context *gin.Context){
 	}
 
 	//Get the updated entry
-	 db.DB.Get(&timeEntry,"SELECT * FROM time_entries WHERE id = $1",request.ID)
+	db.DB.Get(&timeEntry,"SELECT * FROM time_entries WHERE id = $1",request.ID)
 	tools.RemoveSingleTZ(&timeEntry)
 	context.JSON(http.StatusOK, timeEntry)
 
