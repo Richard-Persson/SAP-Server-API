@@ -1,22 +1,18 @@
-
 package main
 
 import (
-  "context"
-  "log"
-  "net/http"
-  "os"
-  "os/signal"
-  "time"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
 
-  "github.com/Richard-Persson/SAP-Server-API/db"
-  "github.com/Richard-Persson/SAP-Server-API/internal/handlers"
+	"github.com/Richard-Persson/SAP-Server-API/db"
+	"github.com/Richard-Persson/SAP-Server-API/internal/handlers"
 )
 
 func main() {
   db.Init()
 
-	ctx := context.Background()
 
 	/*
 	// Dropper tabeller 
@@ -48,13 +44,5 @@ func main() {
   signal.Notify(quit, os.Interrupt)
   <-quit
 
-  ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-  defer cancel()
-  if err := server.Shutdown(ctx); err != nil {
-    log.Fatalf("shutdown error: %v", err)
-  }
-  if err := db.DB.Close(); err != nil {
-    log.Printf("db close: %v", err)
-  }
 }
 
