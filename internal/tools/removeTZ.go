@@ -5,10 +5,6 @@ import (
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
 )
 
-
-
-
-
 func RemoveTZ(entries *[]models.TimeEntry)  {
 	for i,obj := range *entries{
 		before, _, _ := strings.Cut(obj.Date,"T")
