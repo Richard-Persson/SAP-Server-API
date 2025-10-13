@@ -6,6 +6,7 @@ import (
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
 	"github.com/Richard-Persson/SAP-Server-API/internal/payload/requests"
+	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,7 +23,7 @@ func login(context *gin.Context) {
 
   var user models.User
 
-  userError := db.DB.Get(&user, "SELECT id, first_name, last_name, email, mobile, password, billing_code_id FROM users WHERE email=$1", loginRequest.Email)
+  userError := db.DB.Get(&user, "SELECT * FROM users WHERE email=$1", loginRequest.Email)
   if userError != nil {
     context.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
     return
@@ -36,7 +37,30 @@ func login(context *gin.Context) {
     return
   }
 
+	const timeEntriesQuery= `
+		SELECT * 
+		FROM time_entries 
+		WHERE user_id = $1
+		`
+	var timeEntries []models.TimeEntry 
+
+	dbErr := db.DB.Select(&timeEntries,timeEntriesQuery,user.ID)
+
+	user.Entries = &timeEntries
+
+	//Removes T00:00:00Z From Date attribute
+	tools.RemoveTZ(&timeEntries)
+
+	if dbErr != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": dbErr.Error()})
+		return
+	}
+
+
 	//TODO Add Cookie and/or BasicAuthDb() for better authentication and user experience
+
+
+
 
 	context.JSON(http.StatusOK, user)
 }
