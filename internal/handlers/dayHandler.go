@@ -5,6 +5,7 @@ import (
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
+	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,6 +40,7 @@ func getDaysByUserId(context *gin.Context){
 		return
 	}
 
+	
 
 	for i := 0; i < len(days); i++ {
 
@@ -47,9 +49,12 @@ func getDaysByUserId(context *gin.Context){
 			return
 		}
 
+		tools.RemoveTZ(&timeEntries)
+		tools.DateFormatter(&days[i].Date)
 		days[i].TimeEntries = timeEntries
 
 	}
+
 
 	context.JSON(http.StatusOK, days)
 

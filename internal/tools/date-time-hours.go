@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -33,4 +34,10 @@ func DateTimeHoursFormatter(date string, start string, end string) (time.Time, t
 
 	return newDate, startTime, endTime, *p_total_hours, nil
 
+}
+
+func DateFormatter(date *string) ()  {
+
+	before, _, _ := strings.Cut(*date,"T")
+	*date = before
 }
