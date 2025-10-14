@@ -13,7 +13,7 @@ import (
 
 
 
-func getDaysByUserId(context *gin.Context){
+func getAllDaysByUserId(context *gin.Context){
 
 	userId := context.Param("id");
 

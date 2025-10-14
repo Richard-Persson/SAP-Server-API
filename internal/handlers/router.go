@@ -32,12 +32,14 @@ func Router() http.Handler {
 
 	router.GET("/activities", getAllActivities)
 	router.GET("/activities/:id", getActivityById)
+	router.GET("/activities/day/:id", getSingleDayByDayId)
 
 	router.POST("/timeEntry", saveTimeEntry)
 	router.PATCH("/timeEntry", updateTimeEntry)
 
 
-	router.GET("days/:id", getDaysByUserId)
+	router.GET("days/all/:id", getAllDaysByUserId)
+
 	router.GET("days/", getAllDays)
 
 	router.POST("/login", login)

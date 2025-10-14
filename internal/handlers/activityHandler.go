@@ -51,3 +51,41 @@ func getAllActivities(context *gin.Context)  {
 	context.JSON(http.StatusOK, activites)
 }
 
+
+func getSingleDayByDayId(context *gin.Context){
+
+	dayId := context.Param("id");
+
+	var day models.Day
+	var timeEntries []models.TimeEntry
+
+	const dayQuery = 
+		`
+		SELECT * 
+		FROM days
+		WHERE id = $1
+		`
+
+	const teQuery = 
+		`
+		SELECT * 
+		FROM time_entries
+		WHERE date = $1 AND user_id = $2
+		`
+	err := db.DB.Get(&day, dayQuery, dayId)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"Days error": err.Error()})
+		return
+	}
+
+	if 	err := db.DB.Select(&timeEntries,teQuery,day.Date,day.UserID); err != nil {
+
+		context.JSON(http.StatusInternalServerError, gin.H{"Time Entry error": err.Error()})
+		return
+	}
+
+	day.TimeEntries = timeEntries
+
+	context.JSON(http.StatusOK, day)
+}
