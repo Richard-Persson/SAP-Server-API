@@ -37,6 +37,8 @@ func Router() http.Handler {
 	router.PATCH("/timeEntry", updateTimeEntry)
 
 
+	router.GET("days/:id", getDaysByUserId)
+	router.GET("days/", getAllDays)
 
 	router.POST("/login", login)
 	router.POST("/register", register)

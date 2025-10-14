@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
@@ -16,6 +18,7 @@ func saveTimeEntry (context *gin.Context){
 
 	var request requests.TimeEntryRequest
 	var time_entry models.TimeEntry
+	var day models.Day
 
 	if err := context.ShouldBindJSON(&request); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -36,11 +39,35 @@ func saveTimeEntry (context *gin.Context){
 	}
 
 
+	//Insert time entry in DB
 	err :=	db.DB.Get(&time_entry,query,request.UserID,request.ActivityID,date,startTime, endTime, total_hours)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, err.Error())
 		return
+	}
+
+
+
+	//===============================================================================================
+	//Create a new day in the DB with the same date as the timeEntry if that day dosen't already exist
+	//TODO refactor this later?
+
+	const dayQuery =
+		`
+		SELECT * 
+		FROM days
+		WHERE date = $1
+		`
+	dayErr := db.DB.Get(&day,dayQuery,date)
+
+
+	if dayErr != nil {
+	createDay(request.UserID, date, total_hours)
+	}else {
+
+	//If day already exists
+	updateDay(date,total_hours)
 	}
 
 	context.JSON(http.StatusCreated, time_entry)
@@ -122,4 +149,65 @@ func updateTimeEntry(context *gin.Context){
 
 }
 
+
+
+func createDay(user_id int64, date time.Time,total_hours float64 ) error{
+
+	var day models.Day
+
+
+	const query = `
+		INSERT INTO days(date, user_id, total_hours) 
+		VALUES ($1, $2, $3)  
+		`
+	fmt.Println("======================================")
+	fmt.Printf("HOURS ALEREADY IN DATE: %v", total_hours)
+	fmt.Println("======================================")
+
+	err:= db.DB.Get(&day,query,date,user_id,total_hours);
+
+	if err != nil { return err }
+
+	return nil
+
+}
+
+
+func updateDay (date time.Time, new_hours float64) error {
+
+
+	//Get current hours
+	const getQuery = 
+		`
+		SELECT total_hours 
+		FROM days
+		WHERE date = $1
+		`
+
+	var current_hours float64
+	getErr := db.DB.Get(&current_hours,getQuery,date);
+	if getErr != nil { return getErr }
+
+	fmt.Println("======================================")
+	fmt.Printf("HOURS ALEREADY IN DATE: %v", current_hours)
+	fmt.Println("======================================")
+	fmt.Printf("NEW HOURS: %v", new_hours)
+	fmt.Println("======================================")
+
+	//Add new hours
+	const insertQuery = 
+		`
+		UPDATE days
+		SET total_hours = $1
+		WHERE date = $2
+		`
+
+	_,insertErr := db.DB.Exec(insertQuery,current_hours + new_hours,date)
+	if insertErr != nil { return insertErr }
+
+
+
+	return nil
+
+}
 
