@@ -57,9 +57,9 @@ func saveTimeEntry (context *gin.Context){
 		`
 		SELECT * 
 		FROM days
-		WHERE date = $1
+		WHERE date = $1 AND user_id = $2
 		`
-	dayErr := db.DB.Get(&day,dayQuery,date)
+	dayErr := db.DB.Get(&day,dayQuery,date,request.UserID)
 
 
 	if dayErr != nil {
