@@ -9,6 +9,7 @@ import (
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
 	"github.com/Richard-Persson/SAP-Server-API/internal/payload/requests"
+	"github.com/Richard-Persson/SAP-Server-API/internal/queries"
 	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +32,7 @@ func saveTimeEntry (context *gin.Context){
 		RETURNING id, user_id, activity_id, date, start_time, end_time, total_hours
 		`
 
-	date,startTime,endTime,total_hours,parseErr := tools.DateTimeHoursFormatter(request.Date,request.StartTime,request.EndTime)
+	date,startTime,endTime,total_hours_entries,parseErr := tools.DateTimeHoursFormatter(request.Date,request.StartTime,request.EndTime)
 
 	if parseErr != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"parse error": parseErr.Error()})
@@ -40,7 +41,7 @@ func saveTimeEntry (context *gin.Context){
 
 
 	//Insert time entry in DB
-	err :=	db.DB.Get(&time_entry,query,request.UserID,request.ActivityID,date,startTime, endTime, total_hours)
+	err :=	db.DB.Get(&time_entry,query,request.UserID,request.ActivityID,date,startTime, endTime, total_hours_entries)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, err.Error())
@@ -63,11 +64,11 @@ func saveTimeEntry (context *gin.Context){
 
 
 	if dayErr != nil {
-	createDay(request.UserID, date, total_hours)
+	createDay(request.UserID, date, total_hours_entries)
 	}else {
 
 	//If day already exists
-	updateDay(date,total_hours)
+	updateDay(date,total_hours_entries,request.UserID)
 	}
 
 	context.JSON(http.StatusCreated, time_entry)
@@ -77,35 +78,17 @@ func saveTimeEntry (context *gin.Context){
 
 func getAllTimeEntries(context *gin.Context) {
 
-	id, err := strconv.ParseInt(context.Param("id"),0,64)
+	var timeEntries []models.TimeEntry
+	user_id, err := strconv.ParseInt(context.Param("id"),0,64)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-
-	const query = `
-		SELECT * 
-		FROM time_entries 
-		WHERE user_id = $1
-		`
-	var timeEntries []models.TimeEntry 
-
-	dbErr := db.DB.Select(&timeEntries,query,id)
-
-	//Removes T00:00:00Z From Date attribute
-	tools.RemoveTZ(&timeEntries)
-
-
-
-	if dbErr != nil {
-		context.JSON(http.StatusInternalServerError, dbErr.Error())
-		return
-	}
+	queries.GetTimeEntriesByUserId(&timeEntries,user_id,context)
 	context.JSON(http.StatusAccepted, timeEntries)
 }
-
 
 
 func updateTimeEntry(context *gin.Context){
@@ -173,7 +156,7 @@ func createDay(user_id int64, date time.Time,total_hours float64 ) error{
 }
 
 
-func updateDay (date time.Time, new_hours float64) error {
+func updateDay (date time.Time, total_hours_entries float64, user_id int64) error {
 
 
 	//Get current hours
@@ -181,17 +164,17 @@ func updateDay (date time.Time, new_hours float64) error {
 		`
 		SELECT total_hours 
 		FROM days
-		WHERE date = $1
+		WHERE date = $1 and user_id = $2
 		`
 
 	var current_hours float64
-	getErr := db.DB.Get(&current_hours,getQuery,date);
+	getErr := db.DB.Get(&current_hours,getQuery,date,user_id);
 	if getErr != nil { return getErr }
 
 	fmt.Println("======================================")
 	fmt.Printf("HOURS ALEREADY IN DATE: %v", current_hours)
 	fmt.Println("======================================")
-	fmt.Printf("NEW HOURS: %v", new_hours)
+	fmt.Printf("NEW HOURS: %v", total_hours_entries)
 	fmt.Println("======================================")
 
 	//Add new hours
@@ -199,10 +182,10 @@ func updateDay (date time.Time, new_hours float64) error {
 		`
 		UPDATE days
 		SET total_hours = $1
-		WHERE date = $2
+		WHERE date = $2 and user_id = $3
 		`
 
-	_,insertErr := db.DB.Exec(insertQuery,current_hours + new_hours,date)
+	_,insertErr := db.DB.Exec(insertQuery,current_hours + total_hours_entries,date,user_id)
 	if insertErr != nil { return insertErr }
 
 
