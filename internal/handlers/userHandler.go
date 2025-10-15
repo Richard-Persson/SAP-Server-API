@@ -6,7 +6,7 @@ import (
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
-	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
+	"github.com/Richard-Persson/SAP-Server-API/internal/queries"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,14 +23,12 @@ func listUsers(context *gin.Context) {
 func getUserById(context *gin.Context){
 
 	var user models.User
-	idString := context.Param("id")
-	idNumber, parseErr := strconv.ParseInt(idString, 0, 64)
+	var timeEntries []models.TimeEntry 
 
+	userId, parseErr := strconv.ParseInt(context.Param("id"), 0, 64)
 	if parseErr != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"Error": parseErr.Error()})
 	}
-
-	println("ID: ", idNumber)
 
 	const query = 
 		`
@@ -38,29 +36,15 @@ func getUserById(context *gin.Context){
 		FROM users 
 		WHERE id = $1
 		`
-	const timeEntriesQuery= `
-		SELECT * 
-		FROM time_entries 
-		WHERE user_id = $1
-		`
-	var timeEntries []models.TimeEntry 
-
-	dbErr := db.DB.Select(&timeEntries,timeEntriesQuery,idNumber)
-	if dbErr != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"Error": dbErr.Error()})
-		return
-	}
-
-	err := db.DB.Get(&user, query,idNumber)
-	user.Entries = &timeEntries
-
-	//Removes T00:00:00Z From Date attribute
-	tools.RemoveTZ(&timeEntries)
-
+	err := db.DB.Get(&user, query,userId)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"User not found: ": err.Error()})
 		return
 	}
+
+	//Get all entries for a single user
+	queries.GetTimeEntriesByUserId(&timeEntries, userId, context)
+	user.Entries = &timeEntries
 
 	context.JSON(http.StatusOK, user)
 
