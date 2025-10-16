@@ -29,11 +29,12 @@ func register(c *gin.Context){
   }
 
   // Insert user into the database
-  const query = `
+	const query = 
+		`
 		INSERT INTO users (email, first_name, last_name, mobile, password, billing_code_id)
-    VALUES ($1, $2, $3, $4, $5, 1)
-    RETURNING id, first_name, last_name, email, mobile, password
-  `
+		VALUES ($1, $2, $3, $4, $5, 1)
+		RETURNING id, first_name, last_name, email, mobile, password, billing_code_id
+		`
   var user models.User
   err = db.DB.Get(&user, query, request.Email, request.FirstName, request.LastName, request.Mobile,hash)
 
