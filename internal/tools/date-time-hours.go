@@ -28,7 +28,7 @@ func DateTimeHoursFormatter(date string, start string, end string) (time.Time, t
 	}
 
 	p_total_hours := &total_hours
-	*p_total_hours = endTime.Sub(startTime).Hours()
+	*p_total_hours = endTime.Sub(startTime).Hours()-0.5
 
 	return newDate, startTime, endTime, *p_total_hours, nil
 }

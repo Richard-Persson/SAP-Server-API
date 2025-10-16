@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func getActivityById(context *gin.Context)  {
 
 	var id,_ = strconv.ParseInt(context.Param("id"),0,64)
@@ -22,7 +21,6 @@ func getActivityById(context *gin.Context)  {
 		WHERE id = $1
 		`
 
-
 	err := db.DB.Get(&activity,query,id)
 		
 	if err != nil {
@@ -31,7 +29,6 @@ func getActivityById(context *gin.Context)  {
 	}
 	context.JSON(http.StatusOK, activity)
 }
-
 
 func getAllActivities(context *gin.Context)  {
 
@@ -50,7 +47,6 @@ func getAllActivities(context *gin.Context)  {
 	}
 	context.JSON(http.StatusOK, activites)
 }
-
 
 // TODO Move this to another handler to make the structure clearer
 func getSingleDayWithTimeEntries(context *gin.Context){

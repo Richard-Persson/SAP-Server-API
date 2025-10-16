@@ -11,7 +11,6 @@ import(
 	"github.com/gin-gonic/gin"
 )
 
-
 func register(c *gin.Context){
 
 	var request requests.RegisterRequest 
@@ -19,7 +18,6 @@ func register(c *gin.Context){
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 
 	// Hash the plaintext password
 	hash, err := tools.HashPassword(request.Password)

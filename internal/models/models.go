@@ -47,6 +47,6 @@ type Day struct {
 	ID   			int64  `db:"id" json:"id"`
 	Date     	  	string `json:"date" format:"2006-01-02"`
 	UserID         	int64      `db:"user_id" json:"user_id"`
-	TotalHours	 	float32   `db:"total_hours" json:"total_hours"`
+	TotalHours	 	float64   `db:"total_hours" json:"total_hours"`
 	TimeEntries     []TimeEntry `json:"time_entries"`
 }

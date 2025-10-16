@@ -23,7 +23,6 @@ func login(context *gin.Context) {
 		return
 	}
 
-
 	userError := db.DB.Get(&user, "SELECT * FROM users WHERE email=$1", loginRequest.Email)
 	if userError != nil {
 		context.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
@@ -37,7 +36,6 @@ func login(context *gin.Context) {
 		context.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
 	}
-
 
 	//Get all time entries for the user
 	if err, http_code := queries.GetTimeEntriesByUserId(&timeEntries,user.ID); err!= nil {

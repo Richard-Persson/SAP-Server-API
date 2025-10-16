@@ -72,11 +72,8 @@ func createTimeEntry (context *gin.Context){
 			return 
 		}
 	}
-
 	context.JSON(http.StatusCreated, time_entry)
-
 }
-
 
 func getAllTimeEntriesGivenUserId(context *gin.Context) {
 
@@ -94,7 +91,6 @@ func getAllTimeEntriesGivenUserId(context *gin.Context) {
 	}
 	context.JSON(http.StatusOK,timeEntries)
 }
-
 
 func updateTimeEntry(context *gin.Context){
 
@@ -125,7 +121,6 @@ func createDay(user_id int64, date time.Time,total_hours float64 ) error{
 		INSERT INTO days(date, user_id, total_hours) 
 		VALUES ($1, $2, $3)  
 		`
-
 	err:= db.DB.Get(&day,query,date,user_id,total_hours);
 
 	if err != nil {
@@ -134,7 +129,6 @@ func createDay(user_id int64, date time.Time,total_hours float64 ) error{
 	}
 	return nil
 }
-
 
 func updateDay (date time.Time, total_hours_entries float64, user_id int64) error {
 
