@@ -12,7 +12,6 @@ func RemoveTZ(entries *[]models.TimeEntry)  {
 	}
 }
 
-
 func RemoveSingleTZ(entry *models.TimeEntry)  {
 	before, _, _ := strings.Cut(entry.Date,"T")
 	entry.Date = before

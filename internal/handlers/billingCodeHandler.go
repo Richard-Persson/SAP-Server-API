@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func getBillingCodeById(context *gin.Context)  {
 
 	var id,_ = strconv.ParseInt(context.Param("id"),0,64)
@@ -30,7 +29,6 @@ func getBillingCodeById(context *gin.Context)  {
 	}
 	context.JSON(http.StatusOK, billingCode)
 }
-
 
 func getAllBillingCodes(context *gin.Context)  {
 

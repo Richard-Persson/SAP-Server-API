@@ -62,7 +62,7 @@ func createTimeEntry (context *gin.Context){
 	if dayErr != nil {
 		createDay(request.UserID, date, total_hours_entries)
 
-	}else {
+	} else {
 
 		//If day already exists
 		err := updateDay(date,total_hours_entries,request.UserID)
@@ -132,7 +132,6 @@ func createDay(user_id int64, date time.Time,total_hours float64 ) error{
 
 func updateDay (date time.Time, total_hours_entries float64, user_id int64) error {
 
-
 	//Get current hours
 	const getQuery = 
 		`
@@ -160,13 +159,9 @@ func updateDay (date time.Time, total_hours_entries float64, user_id int64) erro
 		WHERE date = $2 and user_id = $3
 		`
 
-
 	_,insertErr := db.DB.Exec(insertQuery,current_hours + total_hours_entries,date,user_id)
 	if insertErr != nil { return insertErr }
 
-
-
 	return nil
-
 }
 

@@ -52,5 +52,4 @@ func getUserById(context *gin.Context){
 	user.Entries = &timeEntries
 
 	context.JSON(http.StatusOK, user)
-
 }

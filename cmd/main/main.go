@@ -13,7 +13,6 @@ import (
 func main() {
   db.Init()
 
-
 	/*
 	// Dropper tabeller 
 	if err := db.RollbackFromFiles(ctx, "migrations"); err != nil {
@@ -25,8 +24,6 @@ func main() {
 		log.Fatalf("migrate failed: %v", err)
 	}
 	*/
-
-
 
   server := &http.Server{
     Addr:    ":8080",
@@ -43,6 +40,5 @@ func main() {
   quit := make(chan os.Signal, 1)
   signal.Notify(quit, os.Interrupt)
   <-quit
-
 }
 

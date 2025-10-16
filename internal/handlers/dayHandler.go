@@ -8,6 +8,7 @@ import (
 	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
+
 func getAllDaysByUserId(context *gin.Context){
 
 	userId := context.Param("id");

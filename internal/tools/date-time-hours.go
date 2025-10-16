@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-
-
 func DateTimeHoursFormatter(date string, start string, end string) (time.Time, time.Time, time.Time, float64, error)  {
 
 	fmt.Printf("\ndate: %v | start: %v | end: %v\n",date,start,end)

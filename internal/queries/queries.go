@@ -28,18 +28,15 @@ func GetTimeEntriesByUserId(timeEntries *[]models.TimeEntry ,user_id int64) (err
 		return e,http.StatusBadRequest
 	}
 
-
 	//Removes T00:00:00Z From Date attribute
 	tools.RemoveTZ(timeEntries)
 	return nil, http.StatusOK
 }
 
-
 /*
 Gets all entries for a user given their ID
 */
 func UpdateTimeEntry(request requests.UpdateTimeEntryRequest, timeEntry *models.TimeEntry) (error, int) {
-
 
 	const query = 
 		`
@@ -61,8 +58,5 @@ func UpdateTimeEntry(request requests.UpdateTimeEntryRequest, timeEntry *models.
 		return e , http.StatusBadRequest
 	}
 
-
 	return nil ,  http.StatusOK
-
 }
-

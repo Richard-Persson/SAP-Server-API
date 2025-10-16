@@ -1,4 +1,5 @@
 package db
+
 // RollbackFromFiles executes all *.down.sql files in the given directory in reverse lexical order.
 // Use this to drop or rollback schema changes defined in corresponding .down.sql files.
 import (
@@ -11,8 +12,10 @@ import (
   "strings"
   "time"
 )
+
 func RollbackFromFiles(ctx context.Context, dir string) error {
   var files []string
+
   err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
     if err != nil {
       return err
@@ -25,6 +28,7 @@ func RollbackFromFiles(ctx context.Context, dir string) error {
     }
     return nil
   })
+
   if err != nil {
     return err
   }
@@ -79,7 +83,6 @@ func RollbackFromFiles(ctx context.Context, dir string) error {
 
     cancel()
   }
-
   return nil
 }
 

@@ -8,10 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 func Router() http.Handler {
 	router := gin.Default()
-
 
 	// CORS config for React dev server
 	router.Use(cors.New(cors.Config{
@@ -21,7 +19,6 @@ func Router() http.Handler {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-
 
 	//Users
 	router.GET("/users", listUsers)
@@ -36,19 +33,18 @@ func Router() http.Handler {
 	router.GET("/activities", getAllActivities)
 	router.GET("/activities/:id", getActivityById)
 
-
+	// Time entry
 	router.POST("/timeEntry", createTimeEntry)
 	router.PATCH("/timeEntry", updateTimeEntry)
 	router.GET("/timeEntry/day/:id", getSingleDayWithTimeEntries)
 
-
+	// Days
 	router.GET("days/all/:id", getAllDaysByUserId)
-
 	router.GET("days/", getAllDays)
 
+	// Login and registration
 	router.POST("/login", login)
 	router.POST("/register", register)
-
 
 	return router
 }
