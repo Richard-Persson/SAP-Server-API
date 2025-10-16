@@ -20,7 +20,6 @@ func DateTimeHoursFormatter(date string, start string, end string) (time.Time, t
 	if dateParseErr != nil {
 		return newDate, startTime, endTime, total_hours, dateParseErr
 	}
-
 	if timeParseErr1 != nil {
 		return newDate, startTime, endTime, total_hours, timeParseErr1
 	}
@@ -31,9 +30,7 @@ func DateTimeHoursFormatter(date string, start string, end string) (time.Time, t
 	p_total_hours := &total_hours
 	*p_total_hours = endTime.Sub(startTime).Hours()
 
-
 	return newDate, startTime, endTime, *p_total_hours, nil
-
 }
 
 func DateFormatter(date *string) ()  {

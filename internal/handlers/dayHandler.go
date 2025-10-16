@@ -8,18 +8,10 @@ import (
 	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
-
-
-
-
-
 func getAllDaysByUserId(context *gin.Context){
 
 	userId := context.Param("id");
-
 	var days []models.Day
-	var timeEntries []models.TimeEntry
-
 
 	const dayQuery = 
 	`
@@ -40,9 +32,10 @@ func getAllDaysByUserId(context *gin.Context){
 		return
 	}
 
-	
-
+	//Get all time entries for all days
 	for i := 0; i < len(days); i++ {
+
+	var timeEntries []models.TimeEntry //New list for each day
 
 		if 	err := db.DB.Select(&timeEntries,teQuery,days[i].Date,days[i].UserID); err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{"Time Entry error": err.Error()})
@@ -52,13 +45,8 @@ func getAllDaysByUserId(context *gin.Context){
 		tools.RemoveTZ(&timeEntries)
 		tools.DateFormatter(&days[i].Date)
 		days[i].TimeEntries = timeEntries
-
 	}
-
-
 	context.JSON(http.StatusOK, days)
-
-
 }
 
 func getAllDays(context *gin.Context){
@@ -70,17 +58,11 @@ func getAllDays(context *gin.Context){
 		FROM days
 		LIMIT 100
 	`
-
-
 	err := db.DB.Select(&days,query)
 
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"Days error": err.Error()})
 		return
 	}
-
-
 	context.JSON(http.StatusOK, days)
-
-
 }

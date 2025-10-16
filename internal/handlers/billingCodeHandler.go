@@ -23,38 +23,26 @@ func getBillingCodeById(context *gin.Context)  {
 		FROM billing_codes
 		WHERE id = $1
 		`
-
-
-	err := db.DB.Get(&billingCode,query,id)
 		
-	if err != nil {
+	if err := db.DB.Get(&billingCode,query,id); err != nil {
 		context.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	context.JSON(http.StatusOK, billingCode)
-
-
 }
 
 
 func getAllBillingCodes(context *gin.Context)  {
 
 	var billingCodes []models.BillingCode
-
 	const query = 
 		`
 		SELECT * 
 		FROM billing_codes
 		`
-
-
-	err := db.DB.Select(&billingCodes,query)
-		
-	if err != nil {
+	if err := db.DB.Select(&billingCodes,query); err != nil {
 		context.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 	context.JSON(http.StatusOK, billingCodes)
-
 }

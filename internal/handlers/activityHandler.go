@@ -52,7 +52,8 @@ func getAllActivities(context *gin.Context)  {
 }
 
 
-func getSingleDayByDayId(context *gin.Context){
+// TODO Move this to another handler to make the structure clearer
+func getSingleDayWithTimeEntries(context *gin.Context){
 
 	dayId := context.Param("id");
 

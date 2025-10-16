@@ -39,7 +39,11 @@ func login(context *gin.Context) {
 	}
 
 
-	queries.GetTimeEntriesByUserId(&timeEntries,user.ID, context)
+	//Get all time entries for the user
+	if err, http_code := queries.GetTimeEntriesByUserId(&timeEntries,user.ID); err!= nil {
+		context.JSON(http_code, err.Error())
+		return
+	}
 	user.Entries = &timeEntries
 
 	//TODO Add Cookie and/or BasicAuthDb() for better authentication and user experience

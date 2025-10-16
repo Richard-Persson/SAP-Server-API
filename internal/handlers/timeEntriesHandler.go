@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,7 +13,6 @@ import (
 	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
-
 
 func createTimeEntry (context *gin.Context){
 
@@ -40,7 +38,6 @@ func createTimeEntry (context *gin.Context){
 		return
 	}
 
-
 	//Insert time entry in DB
 	err :=	db.DB.Get(&time_entry,query,request.UserID,request.ActivityID,date,startTime, endTime, total_hours_entries)
 
@@ -49,12 +46,10 @@ func createTimeEntry (context *gin.Context){
 		return
 	}
 
-
-
 	//===============================================================================================
-	//Create a new day in the DB with the same date as the timeEntry if that day dosen't already exist
-	//TODO refactor this later?
+	//Create a new day in the DB with the same date as the timeEntry if no date already exists for that specific user.
 
+	//TODO refactor this later?
 	const dayQuery =
 		`
 		SELECT * 
@@ -66,6 +61,7 @@ func createTimeEntry (context *gin.Context){
 
 	if dayErr != nil {
 		createDay(request.UserID, date, total_hours_entries)
+
 	}else {
 
 		//If day already exists
@@ -75,8 +71,6 @@ func createTimeEntry (context *gin.Context){
 			context.JSON(http.StatusBadRequest, gin.H{"Error ": err.Error()})
 			return 
 		}
-
-
 	}
 
 	context.JSON(http.StatusCreated, time_entry)
@@ -84,83 +78,61 @@ func createTimeEntry (context *gin.Context){
 }
 
 
-func getAllTimeEntries(context *gin.Context) {
+func getAllTimeEntriesGivenUserId(context *gin.Context) {
 
 	var timeEntries []models.TimeEntry
 	user_id, err := strconv.ParseInt(context.Param("id"),0,64)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"Parse error": err.Error()})
 		return
 	}
 
-	queries.GetTimeEntriesByUserId(&timeEntries,user_id,context)
-	context.JSON(http.StatusAccepted, timeEntries)
+	if err,http_code := queries.GetTimeEntriesByUserId(&timeEntries,user_id); err != nil {
+		context.JSON(http_code, timeEntries)
+		return
+	}
+	context.JSON(http.StatusOK,timeEntries)
 }
 
 
 func updateTimeEntry(context *gin.Context){
 
-
 	var request requests.UpdateTimeEntryRequest
+	var timeEntry models.TimeEntry
+
 	if err := context.ShouldBindJSON(&request); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	const query = 
-		`
-		UPDATE time_entries
-		SET activity_id = $1, date = $2, start_time = $3, end_time = $4, total_hours = $5
-		WHERE id = $6
-		`
-
-	date,startTime,endTime,total_hours,parseErr := tools.DateTimeHoursFormatter(request.Date,request.StartTime,request.EndTime)
-	if parseErr != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"parse error": parseErr.Error()})
-		return
-	}
-	var timeEntry models.TimeEntry
-
 	//Update timeEntry
-	_,err := db.DB.Exec(query,request.ActivityID, date, startTime, endTime,total_hours,request.ID)
-
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": "could not update timeEntry",
-			"errorMessage": err.Error(),
-		})
-		return
+	if err, http_code := queries.UpdateTimeEntry(request,&timeEntry); err != nil {
+		context.JSON(http_code, err.Error())
 	}
 
 	//Get the updated entry
 	db.DB.Get(&timeEntry,"SELECT * FROM time_entries WHERE id = $1",request.ID)
 	tools.RemoveSingleTZ(&timeEntry)
 	context.JSON(http.StatusOK, timeEntry)
-
 }
-
-
 
 func createDay(user_id int64, date time.Time,total_hours float64 ) error{
 
 	var day models.Day
-
-
-	const query = `
+	const query =
+		`
 		INSERT INTO days(date, user_id, total_hours) 
 		VALUES ($1, $2, $3)  
 		`
-	fmt.Println("======================================")
-	fmt.Printf("HOURS ALEREADY IN DATE: %v", total_hours)
-	fmt.Println("======================================")
 
 	err:= db.DB.Get(&day,query,date,user_id,total_hours);
 
-	if err != nil { return err }
-
+	if err != nil {
+		e := errors.New("Cannot create day: " + err.Error())
+		return e 
+	}
 	return nil
-
 }
 
 
