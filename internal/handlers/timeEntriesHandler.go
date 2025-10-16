@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -15,7 +16,7 @@ import (
 )
 
 
-func saveTimeEntry (context *gin.Context){
+func createTimeEntry (context *gin.Context){
 
 	var request requests.TimeEntryRequest
 	var time_entry models.TimeEntry
@@ -64,11 +65,18 @@ func saveTimeEntry (context *gin.Context){
 
 
 	if dayErr != nil {
-	createDay(request.UserID, date, total_hours_entries)
+		createDay(request.UserID, date, total_hours_entries)
 	}else {
 
-	//If day already exists
-	updateDay(date,total_hours_entries,request.UserID)
+		//If day already exists
+		err := updateDay(date,total_hours_entries,request.UserID)
+
+		if  err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{"Error ": err.Error()})
+			return 
+		}
+
+
 	}
 
 	context.JSON(http.StatusCreated, time_entry)
@@ -171,11 +179,12 @@ func updateDay (date time.Time, total_hours_entries float64, user_id int64) erro
 	getErr := db.DB.Get(&current_hours,getQuery,date,user_id);
 	if getErr != nil { return getErr }
 
-	fmt.Println("======================================")
-	fmt.Printf("HOURS ALEREADY IN DATE: %v", current_hours)
-	fmt.Println("======================================")
-	fmt.Printf("NEW HOURS: %v", total_hours_entries)
-	fmt.Println("======================================")
+	var new_hours = current_hours + total_hours_entries
+
+	if(new_hours > 24){
+		error := errors.New("Cant have more than 24 hours in a day")
+		return error
+	}
 
 	//Add new hours
 	const insertQuery = 
@@ -184,6 +193,7 @@ func updateDay (date time.Time, total_hours_entries float64, user_id int64) erro
 		SET total_hours = $1
 		WHERE date = $2 and user_id = $3
 		`
+
 
 	_,insertErr := db.DB.Exec(insertQuery,current_hours + total_hours_entries,date,user_id)
 	if insertErr != nil { return insertErr }

@@ -34,7 +34,7 @@ func Router() http.Handler {
 	router.GET("/activities/:id", getActivityById)
 	router.GET("/activities/day/:id", getSingleDayByDayId)
 
-	router.POST("/timeEntry", saveTimeEntry)
+	router.POST("/timeEntry", createTimeEntry)
 	router.PATCH("/timeEntry", updateTimeEntry)
 
 
