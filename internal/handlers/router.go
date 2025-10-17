@@ -37,10 +37,12 @@ func Router() http.Handler {
 	router.POST("/timeEntry", createTimeEntry)
 	router.PATCH("/timeEntry", updateTimeEntry)
 	router.GET("/timeEntry/day/:id", getSingleDayWithTimeEntries)
+	router.DELETE("/timeEntry/:id", deleteTimeEntry)
 
 	// Days
 	router.GET("days/all/:id", getAllDaysByUserId)
 	router.GET("days/", getAllDays)
+	router.DELETE("days/:id", deleteDay)
 
 	// Login and registration
 	router.POST("/login", login)

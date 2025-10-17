@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//POST
 func createTimeEntry (context *gin.Context){
 
 	var request requests.TimeEntryRequest
@@ -75,6 +76,7 @@ func createTimeEntry (context *gin.Context){
 	context.JSON(http.StatusCreated, time_entry)
 }
 
+//GET
 func getAllTimeEntriesGivenUserId(context *gin.Context) {
 
 	var timeEntries []models.TimeEntry
@@ -92,6 +94,12 @@ func getAllTimeEntriesGivenUserId(context *gin.Context) {
 	context.JSON(http.StatusOK,timeEntries)
 }
 
+
+
+
+
+
+//PATCH
 func updateTimeEntry(context *gin.Context){
 
 	var request requests.UpdateTimeEntryRequest
@@ -112,6 +120,25 @@ func updateTimeEntry(context *gin.Context){
 	tools.RemoveSingleTZ(&timeEntry)
 	context.JSON(http.StatusOK, timeEntry)
 }
+
+//DELETE
+func deleteTimeEntry(context *gin.Context){
+
+	var id,_ = strconv.ParseInt(context.Param("id"),0,64)
+
+	err , http_code := queries.DeleteTimeEntry(id)
+
+	if err != nil {
+		context.JSON(http_code, err.Error())
+		return 
+	}
+
+	context.JSON(http_code, gin.H{"Deleted timeEntry with id": id});
+
+}
+
+
+
 
 func createDay(user_id int64, date time.Time,total_hours float64 ) error{
 
@@ -164,4 +191,13 @@ func updateDay (date time.Time, total_hours_entries float64, user_id int64) erro
 
 	return nil
 }
+
+
+
+
+
+
+
+
+
 

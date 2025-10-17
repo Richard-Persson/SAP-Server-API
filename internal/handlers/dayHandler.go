@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
 	"github.com/Richard-Persson/SAP-Server-API/internal/models"
+	"github.com/Richard-Persson/SAP-Server-API/internal/queries"
 	"github.com/Richard-Persson/SAP-Server-API/internal/tools"
 	"github.com/gin-gonic/gin"
 )
@@ -15,18 +17,18 @@ func getAllDaysByUserId(context *gin.Context){
 	var days []models.Day
 
 	const dayQuery = 
-	`
+		`
 		SELECT * 
 		FROM days
 		WHERE user_id = $1
-	`
+		`
 
 	const teQuery = 
-	`
+		`
 		SELECT * 
 		FROM time_entries
 		WHERE date = $1 AND user_id = $2
-	`
+		`
 
 	if 	err := db.DB.Select(&days,dayQuery,userId); err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"Days error": err.Error()})
@@ -36,7 +38,7 @@ func getAllDaysByUserId(context *gin.Context){
 	//Get all time entries for all days
 	for i := 0; i < len(days); i++ {
 
-	var timeEntries []models.TimeEntry //New list for each day
+		var timeEntries []models.TimeEntry //New list for each day
 
 		if 	err := db.DB.Select(&timeEntries,teQuery,days[i].Date,days[i].UserID); err != nil {
 			context.JSON(http.StatusInternalServerError, gin.H{"Time Entry error": err.Error()})
@@ -54,11 +56,11 @@ func getAllDays(context *gin.Context){
 
 	var days []models.Day
 	const query = 
-	`
+		`
 		SELECT * 
 		FROM days
 		LIMIT 100
-	`
+		`
 	err := db.DB.Select(&days,query)
 
 	if err != nil {
@@ -66,4 +68,19 @@ func getAllDays(context *gin.Context){
 		return
 	}
 	context.JSON(http.StatusOK, days)
+}
+
+
+func deleteDay(context *gin.Context){
+
+	var id,_ = strconv.ParseInt(context.Param("id"),0,64)
+
+	err , http_code := queries.DeleteDay(id)
+
+	if err != nil {
+		context.JSON(http_code, err.Error())
+		return 
+	}
+
+	context.JSON(http_code, gin.H{"Deleted day with id": id});
 }
