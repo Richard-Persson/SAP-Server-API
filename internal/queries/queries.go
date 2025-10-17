@@ -139,13 +139,43 @@ func DeleteTimeEntry(id int64) (error,int){
 	if err != nil {
 	}
 
+
+
 	const dayQuery = `
 		UPDATE days
 		SET total_hours = total_hours - $1
 		WHERE user_id = $2 AND date = $3
+		RETURNING total_hours, id
 		`
 
-	_, err2 := db.DB.Exec(dayQuery, total_hours, user_id, date)
+	var updatedTotal float64
+	var day_id float64
+	err2 := db.DB.QueryRow(dayQuery, total_hours, user_id, date).Scan(&updatedTotal, &day_id)
+
+
+	if updatedTotal < 0.5{
+
+	const dayQuery =
+			`
+			DELETE FROM days
+			WHERE id = $1
+			`
+
+		_,err3 := db.DB.Exec(dayQuery,day_id)
+
+		if err3 != nil {
+
+		e := errors.New("Failed to delete day for that time_entry : " + err.Error())
+		return e, http.StatusBadRequest
+
+		}
+
+
+
+	}
+
+
+
 
 
 	if err != nil {
