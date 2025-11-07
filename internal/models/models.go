@@ -26,6 +26,7 @@ type TimeEntry struct {
 	ID   			int64   `db:"id" json:"id"`
 	UserID         	int64   `db:"user_id" json:"user_id"`
 	ActivityID      *int64  `db:"activity_id" json:"activity_id,omitempty"`
+	DayID			int64  `db:"day_id" json:"day_id,omitempty"`
   	Date       		string 	`json:"date" format:"2006-01-02"`
 	StartTime 		string  `db:"start_time" json:"start_time"`
 	EndTime         string  `db:"end_time" json:"end_time"`

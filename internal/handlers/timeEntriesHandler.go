@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -26,9 +27,17 @@ func createTimeEntry (context *gin.Context){
 		return
 	}
 
-	const query = `
-		INSERT INTO time_entries (user_id, activity_id, date, start_time, end_time, total_hours)
-		VALUES ($1, $2, $3, $4, $5, $6) 
+	//TODO refactor this later?
+	const dayQuery =
+		`
+		SELECT * 
+		FROM days
+		WHERE date = $1 AND user_id = $2
+		`
+
+	const timeEntryQuery = `
+		INSERT INTO time_entries (user_id, activity_id,day_id, date, start_time, end_time, total_hours)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
 		RETURNING id, user_id, activity_id, date, start_time, end_time, total_hours
 		`
 
@@ -39,32 +48,20 @@ func createTimeEntry (context *gin.Context){
 		return
 	}
 
-	//Insert time entry in DB
-	err :=	db.DB.Get(&time_entry,query,request.UserID,request.ActivityID,date,startTime, endTime, total_hours_entries)
 
-	if err != nil {
-		context.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
 
-	//===============================================================================================
-	//Create a new day in the DB with the same date as the timeEntry if no date already exists for that specific user.
 
-	//TODO refactor this later?
-	const dayQuery =
-		`
-		SELECT * 
-		FROM days
-		WHERE date = $1 AND user_id = $2
-		`
 	dayErr := db.DB.Get(&day,dayQuery,date,request.UserID)
 
 
 	if dayErr != nil {
-		createDay(request.UserID, date, total_hours_entries)
+		day_id,_ := createDay(request.UserID, date, total_hours_entries)
+		day.ID = day_id
+		fmt.Printf("This should print")
 
 	} else {
 
+		fmt.Printf("NO PRINT")
 		//If day already exists
 		err := updateDay(date,total_hours_entries,request.UserID)
 
@@ -73,7 +70,20 @@ func createTimeEntry (context *gin.Context){
 			return 
 		}
 	}
+
+
+	//Insert time entry in DB
+	err :=	db.DB.Get(&time_entry,timeEntryQuery,request.UserID,request.ActivityID,day.ID,date,startTime, endTime, total_hours_entries)
+
+	fmt.Println(request.UserID,request.ActivityID,day.ID,date,startTime, endTime, total_hours_entries)
+
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	context.JSON(http.StatusCreated, time_entry)
+
 }
 
 //GET
@@ -140,21 +150,24 @@ func deleteTimeEntry(context *gin.Context){
 
 
 
-func createDay(user_id int64, date time.Time,total_hours float64 ) error{
+func createDay(user_id int64, date time.Time,total_hours float64 ) (int64 ,error){
 
 	var day models.Day
 	const query =
 		`
 		INSERT INTO days(date, user_id, total_hours) 
 		VALUES ($1, $2, $3)  
+		RETURNING *
 		`
 	err:= db.DB.Get(&day,query,date,user_id,total_hours);
 
+	fmt.Printf("\n\nTHIS IS THE DAY:",day)
+
 	if err != nil {
 		e := errors.New("Cannot create day: " + err.Error())
-		return e 
+		return 0,e 
 	}
-	return nil
+	return day.ID,nil
 }
 
 func updateDay (date time.Time, total_hours_entries float64, user_id int64) error {

@@ -2,7 +2,6 @@ package queries
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/Richard-Persson/SAP-Server-API/db"
@@ -21,7 +20,7 @@ func GetTimeEntriesByUserId(timeEntries *[]models.TimeEntry ,user_id int64) (err
 		FROM time_entries 
 		WHERE user_id = $1
 		`
-	
+
 	error := db.DB.Select(timeEntries,timeEntriesQuery,user_id)
 
 	if error != nil {
@@ -65,8 +64,6 @@ func UpdateTimeEntry(request requests.UpdateTimeEntryRequest, timeEntry *models.
 	if(oldTimeEntry.Date != request.Date){
 	}
 
-
-
 	//Oppdaterer TimeEntry
 	_,err := db.DB.Exec(query,request.ActivityID, date, startTime, endTime,total_hours,request.ID)
 
@@ -75,52 +72,27 @@ func UpdateTimeEntry(request requests.UpdateTimeEntryRequest, timeEntry *models.
 		return e , http.StatusBadRequest
 	}
 
-
-	// TODO Update the day where timeEntry resides
-
 	return nil ,  http.StatusOK
 }
-
 
 func DeleteDay(id int64) (error,int){
 
 	//Delete day and get the date and user_id for the dates
-    const dayQuery = `
-        DELETE FROM days
-        WHERE id = $1
-        RETURNING date, user_id
-    `
+	const dayQuery = `
+		DELETE FROM days
+		WHERE id = $1
+		RETURNING date, user_id
+		`
 	var date string
 	var user_id int
 	err := db.DB.QueryRow(dayQuery,id).Scan(&date, &user_id)
-
-
-	fmt.Printf("ID: %v", id)
-
-    const teQuery = `
-        DELETE FROM time_entries
-        WHERE date = $1 AND user_id = $2
-    `
-
-	//Delete corresponding time_entries
-
-	_,err2 := db.DB.Exec(teQuery,date,user_id);
 
 	if err != nil {
 		e := errors.New("Failed to delete day: " + err.Error())
 		return e, http.StatusBadRequest
 	}
 
-	if err2 != nil {
-		e := errors.New("Failed to delete time_entries: " + err.Error())
-		return e, http.StatusBadRequest
-	}
-
-
-
 	return nil, http.StatusOK
-
-
 }
 
 func DeleteTimeEntry(id int64) (error,int){
@@ -129,54 +101,38 @@ func DeleteTimeEntry(id int64) (error,int){
 		`
 		DELETE FROM time_entries
 		WHERE id = $1
-		RETURNING  date, user_id, total_hours
+		RETURNING total_hours, day_id
 		`
-	var date string
-	var user_id int
+	var day_id int64
 	var total_hours float64
-
-	err := db.DB.QueryRow(teQuery, id).Scan(&date, &user_id, &total_hours)
-	if err != nil {
-	}
-
-
+	err := db.DB.QueryRow(teQuery, id).Scan(&total_hours, &day_id)
 
 	const dayQuery = `
 		UPDATE days
 		SET total_hours = total_hours - $1
-		WHERE user_id = $2 AND date = $3
-		RETURNING total_hours, id
+		WHERE id = $2
+		RETURNING total_hours
 		`
 
 	var updatedTotal float64
-	var day_id float64
-	err2 := db.DB.QueryRow(dayQuery, total_hours, user_id, date).Scan(&updatedTotal, &day_id)
-
+	err2 := db.DB.QueryRow(dayQuery, total_hours, day_id).Scan(&updatedTotal)
 
 	if updatedTotal < 0.5{
 
-	const dayQuery =
+		const dayQuery =
 			`
 			DELETE FROM days
 			WHERE id = $1
 			`
 
-		_,err3 := db.DB.Exec(dayQuery,day_id)
+		_,err := db.DB.Exec(dayQuery,day_id)
 
-		if err3 != nil {
-
-		e := errors.New("Failed to delete day for that time_entry : " + err.Error())
-		return e, http.StatusBadRequest
+		if err != nil {
+			e := errors.New("Failed to delete day for that time_entry : " + err.Error())
+			return e, http.StatusBadRequest
 
 		}
-
-
-
 	}
-
-
-
-
 
 	if err != nil {
 		e := errors.New("Failed to delete timeEntry : " + err.Error())
@@ -188,6 +144,4 @@ func DeleteTimeEntry(id int64) (error,int){
 		return e, http.StatusBadRequest
 	}
 	return nil, http.StatusOK
-
-
 }
